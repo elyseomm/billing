@@ -1,0 +1,73 @@
+﻿@page "/customer/edit/{id}"
+@using Billing.Core.Utils
+@using BlazorApp2.Model
+@using System.Text
+@using System.Security.Cryptography
+@using Newtonsoft.Json.Linq
+@inject BlazorApp2.API.CustomerApiClient Client
+
+@inject NavigationManager Navigation
+
+<PageTitle>Billing - Customers - Edit</PageTitle>
+
+<h1>Customers</h1>
+
+<p>Customer data from the server.</p>
+
+@if (customer == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="mb-3">
+        <label for="name" class="form-label">Name</label>
+        <input type="text" class="form-control" id="name" @bind="@customer.Name" />
+    </div>
+    <div class="mb-3">
+        <label for="email" class="form-label">Email</label>
+        <input type="text" class="form-control" id="email" @bind="@customer.Email" />
+    </div>
+
+    <div class="mb-3">
+        <label for="address" class="form-label">Address</label>
+        <input type="text" class="form-control" id="address" @bind="@customer.Address" />
+    </div>
+
+    <button class="btn btn-secondary" @onclick="Cancel">Cancel</button>
+    <button class="btn btn-primary" @onclick="Update">Save</button>
+    
+}
+
+@code {
+    [Parameter]
+    public string? Id { get; set; } = "";
+    private Customer? customer;
+
+    protected override async Task OnInitializedAsync()
+    {
+        customer = await Client.GetById(Id!);
+
+        //Console.WriteLine(JObject.FromObject(customer).ToString() );
+    }
+
+    private async Task Update()
+    {
+        // Update the club using the service
+        var resp = await Client.Update(customer!);
+
+        Console.WriteLine(resp);
+
+        // Redirect back to the club list page
+        Navigation.NavigateTo("/customers");
+    }
+
+    private void Cancel()
+    {
+        // Navigate back to the club list page
+        Navigation.NavigateTo("/customers");
+    }
+
+}
+
+

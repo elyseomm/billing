@@ -1,0 +1,92 @@
+﻿@page "/products"
+@using BlazorApp2.Model
+@inject HttpClient Http
+@inject BlazorApp2.API.ProductApiClient Client
+@inject NavigationManager Navigation
+<PageTitle>Billing - Products</PageTitle>
+
+<h1>Products</h1>
+
+<p>Products data from the server.</p>
+
+@if (products == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <label type="button" class="btn btn-primary btn-block" @onclick=@(() => New())>
+        <span class="icon-plus"></span> Add new product
+    </label>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Product Name</th>
+                <th>Active</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var row in products)
+            {
+                <tr>
+                    <td>@row.ProductName</td>
+                    <td>
+                        <div class="form-check mt-3">
+                            <InputCheckbox @bind-value="@row.IsActive" class="form-check-input" disabled />
+                        </div>
+                    </td>
+                    <td>
+                        <label type="button" @onclick=@(() => EditBy(row.Id!)) class="btn btn-warning btn-block">
+                            <span class="icon-plus"></span> Edit
+                        </label>
+                        <label type="button" @onclick=@(() => DeleteBy(row.Id!)) class="@GetActiveClass(row.IsActive)">
+                            <span class="icon-plus"></span>
+                            @GetActiveStatus(row.IsActive)
+                        </label>
+                    </td>
+                </tr>
+                
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private Product[]? products;
+
+    protected override async Task OnInitializedAsync()
+    {
+        products = await Client.GetAll();
+    }
+
+    void New()
+    {
+        //string key = CustomConverter.Encodeb64ToHex(id);
+        //string key = BitConverter.ToString(Convert.FromBase64String(b64Id)).Replace("-", "");
+        Navigation.NavigateTo($"/product/new");
+    }
+
+    void EditBy(string id)
+    {
+        //string key = CustomConverter.Encodeb64ToHex(id);
+        //string key = BitConverter.ToString(Convert.FromBase64String(b64Id)).Replace("-", "");
+        Navigation.NavigateTo($"/product/edit/{id}");
+    }
+
+    void DeleteBy(string id)
+    {
+        Navigation.NavigateTo("/product/" + id);
+    }
+
+    string GetActiveStatus(bool isActive)
+    {
+        return isActive ? "Remove" : "Reactivate";
+    }
+    string GetActiveClass(bool isActive)
+    {
+        return isActive ? "btn btn-danger btn-block" : "btn btn-success btn-block";
+    }
+}
+
+

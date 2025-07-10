@@ -1,0 +1,92 @@
+﻿@page "/invoices"
+@using BlazorApp2.Model
+@using System.Text
+@using Billing.Core.Utils
+@inject HttpClient Http
+@inject BlazorApp2.API.CustomerApiClient Client
+
+@inject NavigationManager Navigation
+
+<PageTitle>Billing - Invoices</PageTitle>
+
+<h1>Invoices</h1>
+
+<p>Invoices data from the server.</p>
+
+@if (invoices == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <label type="button" class="btn btn-primary btn-block">
+        <span class="icon-plus"></span> Add new invoice
+    </label>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Address</th>
+                <th>Active</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var row in invoices)
+            {
+                <tr>
+                    <td>@row.Name</td>
+                    <td>@row.Email</td>
+                    <td>@row.Address</td>
+                    <td>
+                        <div class="form-check mt-3">
+                            <InputCheckbox @bind-value="@row.IsActive" class="form-check-input" disabled />
+                        </div>
+                    </td>
+                    <td>
+                        <label type="button" @onclick=@( () => EditBy(row.Id!) ) class="btn btn-warning btn-block">
+                            <span class="icon-plus"></span> Edit
+                        </label>
+                        <label type="button" @onclick=@(() => DeleteBy(row.Id!)) class="@GetActiveClass(row.IsActive)">
+                            <span class="icon-plus"></span>
+                            @GetActiveStatus(row.IsActive)
+                        </label>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private Customer[]? invoices;
+
+    protected override async Task OnInitializedAsync()
+    {
+        invoices = await Client.GetAll();
+    }
+
+    void EditBy(string id)
+    {
+        //string key = CustomConverter.Encodeb64ToHex(id);
+        //string key = BitConverter.ToString(Convert.FromBase64String(b64Id)).Replace("-", "");
+        Navigation.NavigateTo($"/customer/edit/{id}");
+    }
+
+    void DeleteBy(string id)
+    {
+        Navigation.NavigateTo("/customers/" + id);
+    }
+
+    string GetActiveStatus(bool isActive)
+    {
+        return isActive ? "Remove" : "Reactivate";
+    }
+    string GetActiveClass(bool isActive)
+    {
+        return isActive ? "btn btn-danger btn-block" : "btn btn-success btn-block";
+    }
+}
+
+

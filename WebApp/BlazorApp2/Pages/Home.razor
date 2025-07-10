@@ -1,0 +1,23 @@
+﻿@page "/"
+@using System.Collections
+@inject IConfiguration Configuration
+
+<PageTitle>Billing</PageTitle>
+
+<h1>Hello, world! This is the test home page</h1>
+
+Welcome to the Billing system base management.
+
+<h2>Backend Rest API Url: @Configuration["restApi"]</h2>
+<h2>Backend Rest API Url: @restApi</h2>
+<h3>Backend Rest API Url: @teste</h3>
+
+@code {
+    private string restApi = "";
+    private string teste = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+    }
+
+}

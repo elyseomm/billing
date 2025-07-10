@@ -1,0 +1,55 @@
+﻿@page "/product/new"
+@using Billing.Core.Utils
+@using BlazorApp2.Model
+@using System.Text
+@using System.Security.Cryptography
+@using Newtonsoft.Json.Linq
+@inject BlazorApp2.API.ProductApiClient Client
+
+@inject NavigationManager Navigation
+
+<PageTitle>Billing - Products - New</PageTitle>
+
+<h1>Products</h1>
+
+<p>New product to be added in the server.</p>
+
+
+<div class="mb-3">
+    <label for="name" class="form-label">Product Name</label>
+    <input type="text" class="form-control" id="name" @bind="@product.ProductName" />
+</div>
+    
+<button class="btn btn-secondary" @onclick="Cancel">Cancel</button>
+<button class="btn btn-primary" @onclick="Create">Save</button>
+    
+
+
+@code {
+    private Product? product;
+
+    protected override async Task OnInitializedAsync()
+    {
+        product = new Product();
+    }
+
+    private async Task Create()
+    {
+        // Create the product using the service
+        var resp = await Client.Create(product!);
+
+        Console.WriteLine(resp);
+
+        // Redirect back to the product list page
+        Navigation.NavigateTo("/products");
+    }
+
+    private void Cancel()
+    {
+        // Navigate back to the product list page
+        Navigation.NavigateTo("/products");
+    }
+
+}
+
+
