@@ -22,7 +22,7 @@ namespace BlazorApp2.API
                 if (stream != null)
                 {
                     var list = JsonConvert.DeserializeObject<List<Customer>>(stream);
-                    return [.. list!];
+                    return [.. list!.OrderBy(x => x.Name).ToList()];
                 }
             }
             return [];

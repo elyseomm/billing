@@ -3,6 +3,8 @@
 @inject HttpClient Http
 @inject BlazorApp2.API.ProductApiClient Client
 @inject NavigationManager Navigation
+@using BlazorApp2.Components
+
 <PageTitle>Billing - Products</PageTitle>
 
 <h1>Products</h1>
@@ -29,6 +31,7 @@ else
         <tbody>
             @foreach (var row in products)
             {
+                GetActiveStatus(@row.IsActive);
                 <tr>
                     <td>@row.ProductName</td>
                     <td>
@@ -40,20 +43,39 @@ else
                         <label type="button" @onclick=@(() => EditBy(row.Id!)) class="btn btn-warning btn-block">
                             <span class="icon-plus"></span> Edit
                         </label>
-                        <label type="button" @onclick=@(() => DeleteBy(row.Id!)) class="@GetActiveClass(row.IsActive)">
+                        <label type="button" @onclick="() => OnOpenModalDialog(row)" class="@ActiveStatusClass">
                             <span class="icon-plus"></span>
-                            @GetActiveStatus(row.IsActive)
+                            @ActiveStatusMessage
                         </label>
                     </td>
                 </tr>
-                
+
+
             }
         </tbody>
     </table>
 }
 
+<ModalDialog @ref="@ModalDialog" Title="Removing Product">
+    <div class="row">
+        <h3>@Message</h3>
+        <div class="dialog-buttons">
+            <button class="btn btn-secondary" @onclick="() => OnCloseModalDialog(false)">Close</button>
+            <button class="btn btn-primary" @onclick="() => OnCloseModalDialog(true)">Yes</button>
+        </div>
+    </div>
+</ModalDialog>
+
+
 @code {
     private Product[]? products;
+
+    private ModalDialog ModalDialog { get; set; }
+
+    public string? Message { get; set; }
+
+    public string? ActiveStatusMessage { get; set; }
+    public string? ActiveStatusClass { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
@@ -79,14 +101,40 @@ else
         Navigation.NavigateTo("/product/" + id);
     }
 
-    string GetActiveStatus(bool isActive)
+    void GetActiveStatus(bool isActive)
     {
-        return isActive ? "Remove" : "Reactivate";
+        ActiveStatusClass = isActive ? "btn btn-danger btn-block" : "btn btn-success btn-block";
+        ActiveStatusMessage = isActive ? "Remove" : "Reactivate";
     }
-    string GetActiveClass(bool isActive)
+
+    #region Modal
+
+    private async void OnOpenModalDialog(Product row)
     {
-        return isActive ? "btn btn-danger btn-block" : "btn btn-success btn-block";
+        Message = row.IsActive ? "Do you really wants to remove this entry ?" : "Do you really wants to reactivate this entry ?";
+        ModalDialog.Open(row.Id!);
     }
+
+    private async void OnCloseModalDialog(bool accepted)
+    {
+        ModalDialog.Close(accepted);
+        if (accepted)
+        {
+            if (!String.IsNullOrEmpty(ModalDialog.KeyIdentifier))
+            {
+                var product = await Client.GetById(ModalDialog.KeyIdentifier);
+                if(product != null && product.Id != null)
+                {
+                    product.Active = product.IsActive ? 0 : 1;
+                    await Client.Update(product);
+                    products = await Client.GetAll();
+                    StateHasChanged();
+                }
+            }
+        }
+    }
+
+    #endregion
 }
 
 

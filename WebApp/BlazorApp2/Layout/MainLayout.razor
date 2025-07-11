@@ -70,13 +70,13 @@
 
 @code {
     private int WAIT_TO_CHECK_API_ONLINE = 5;
-    private bool apiServerState { set; get; } = false;
-    private string? apiClassStyle { set; get; }
-    private string? apiTextMessage { set; get; }
+    private bool apiServerState { get; set; } = false;
+    private string? apiClassStyle { get; set; }
+    private string? apiTextMessage { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
-        CheckApiIsOnline();
+        await CheckApiIsOnline();
         var cts = new CancellationTokenSource();
         RT(() => CheckApiIsOnline(), WAIT_TO_CHECK_API_ONLINE, cts.Token);
     }
@@ -95,7 +95,7 @@
         }, token);
     }
 
-    private async void CheckApiIsOnline()
+    private async Task CheckApiIsOnline()
     {
         var response = await Client.IsOnline();
         if (response != null)

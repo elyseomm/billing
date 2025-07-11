@@ -1,10 +1,7 @@
 ﻿using BlazorApp2.Model;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using System;
-using System.Net.Http.Json;
 using System.Text;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace BlazorApp2.API
 {
@@ -24,7 +21,7 @@ namespace BlazorApp2.API
                 if (stream != null)
                 {
                     var list = JsonConvert.DeserializeObject<List<Product>>(stream);
-                    return [.. list!];
+                    return [.. list!.OrderBy(x => x.ProductName).ToList()];
                 }
             }
             return [];
@@ -59,10 +56,10 @@ namespace BlazorApp2.API
 
         public async Task<string> Update(Product tuple)
         {
-            var data = new Billing.Core.Models.Customer()
+            var data = new Billing.Core.Models.Product()
             {
                 Id = tuple.Id,
-                Name = tuple.ProductName,
+                ProductName = tuple.ProductName,
                 Active = tuple.Active
             };
 
