@@ -6,8 +6,6 @@ using Newtonsoft.Json.Linq;
 
 namespace Billing.Api.Controllers
 {
-    //[Route("api/[controller]")]
-    //[ApiController]
     public class ApiControllerBase : ControllerBase
     {
         public readonly BillingContext _context;

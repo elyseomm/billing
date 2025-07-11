@@ -26,10 +26,6 @@ namespace Billing.Api.Controllers
             _repo = new InvoiceRepository(logger, loggerF, db);
         }
 
-        [HttpGet]
-        [Route("ping")]
-        public ObjectResult Ping() => new("Pong!");
-
         [HttpGet]        
         public IEnumerable<InvoiceDTO> Get() {
             var resp = new List<InvoiceDTO>();

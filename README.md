@@ -8,7 +8,7 @@ Sistema de Faturamento
 - Baixar o projéto no github: https://github.com/elyseomm/billing.git
 
 - Instancia do MySQL(versão 8.0 de preferência).
-- Crie um Database no MySQL com o nome 'billing'.
+- (optional) Crie um Database no MySQL com o nome 'billing'. O processo de migration ( update-database ) cria o schema do banco de dados;
 
 - Com o VS Instalado e o Projeto Billing baixado em uma pasta de trabalho:
 - Vá para a pasta '..\billing\\billing';
@@ -21,15 +21,15 @@ Sistema de Faturamento
 
 - No prompt de comando do 'Package Manager Console' digite 'add-migrations SetupInicial':
 
-  Passo 1 ( Opcional - Como já vai um arquivo de migration pronto no projeto, este passo não é requerido ):
+  Passo 1 ( Opcional - Como já vai um arquivo de migration pronto no projeto( 20250702152848_SetupInicial.cs ), este passo não é requerido ):
 
   - PM> add-migrations SetupInicial + <ENTER>, aguarde o término do processo;
 
     - deverá surgir a pasta 'Migrations' com dois aquivos no projetoi Billing.Core:
 
-      - 20250702152848_SetupInicial.cs
+      - YYYYMMDDHRMMSS_SetupInicial.cs
 
-  - Depois digite 'update-database' + <ENTER>;
+  - Migration - Depois digite 'update-database' + <ENTER> no Package Management Console;
 
   Passo 2 ( Requerido - Execute para criar o database schema) =>
 
@@ -37,6 +37,13 @@ Sistema de Faturamento
 
 - Neste momento, após rodar o Migration, as tabelas Products e Customers deverão ter sido criada no Banco de Dados 'billing', já com alguns dados cadastrados;
 
+
+
+- GIT BANCHS
+
+
+- Temos 2 Branches 'master' e 'development':
+        IMPORTANTE!!! O código mais atual está na Branch 'development' portanto recomendamos usarem a branch 'development'. 
 ---
 
 - RODANDO A APLICAÇÂO
@@ -56,6 +63,12 @@ Sistema de Faturamento
 
   - Para a listagem do Swagger: https://localhost:44306/swagger/index.html
 
+  - Configure a ConnectionString para conectar no banco MySQL em Billing.Api-> appsettings.json:
+       Ex: 
+           "ConnectionStrings": {
+                "Billing": "Server=localhost; Database=billing; UID=root; Password=root;SSLMODE=None;"
+           }
+
 -(Se desejar instalar numa instância do IIS é só publicar o projeto 'Billing.Api' numa instância do IIS na rede).
 
 ## FRONT-END:
@@ -65,11 +78,11 @@ Sistema de Faturamento
 
 E então marque o projeto 'WebApp' como 'Projeto Inicial' = 'StartUp Project': - para isso clique com o botão direito no projeto 'WebApp' e escolha a opção 'Set as StartUp Project' e estamos prontos pra rodar.
 
-IMPORTANTE: Precisamos configurar o FRONT-END com o endereço(URL) da 'Billing.Api' no :
+IMPORTANTE: Precisamos configurar o FRONT-END com o endereço(URL) da 'Billing.Api' no arquivo 'appsettings.json' dentro do path wwwroot:
 
     Ex: https://localhost:44306
 
-    - Para isto altere o arquivo 'Web.config' dentro de 'appsettings.json' na chave(Key) 'restApi', em valor coloque o endereço do back-end:
+    - Para isto altere o arquivo 'appsettings.json' dentro do path wwwroot na chave(Key) 'restApi', em valor coloque o endereço do back-end:
     Ex:
         {
             "restApi": "https://localhost:44306"

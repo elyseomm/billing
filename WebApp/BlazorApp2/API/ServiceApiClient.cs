@@ -1,53 +1,57 @@
 ﻿using BlazorApp2.Model;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using System;
-using System.Net.Http.Json;
 using System.Text;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace BlazorApp2.API
 {
-    public class ProductApiClient : HttpClient
+    public class ServiceApiClient : HttpClient
     {
-        public ProductApiClient() { }
+        public ServiceApiClient() { }
         public async Task<string> IsOnline()
         {
-            return await GetStringAsync("/Product/ping");
+            try
+            {
+                return await GetStringAsync("/Service/ping");
+            }
+            catch
+            {
+            }
+            return await Task.FromResult("-- offline --");
         }
 
-        public async Task<Product[]> GetAll()
+        public async Task<T[]> GetAll<T>(string modelName)
         {
-            var response = await GetAsync("/Product");
+            var response = await GetAsync($"/{modelName}");
             if (response != null && response.IsSuccessStatusCode) {
                 var stream = await response.Content.ReadAsStringAsync();
                 if (stream != null)
                 {
-                    var list = JsonConvert.DeserializeObject<List<Product>>(stream);
+                    var list = JsonConvert.DeserializeObject<List<T>>(stream);
                     return [.. list!];
                 }
             }
             return [];
         }
 
-        public async Task<Product> GetById(string id)
+        public async Task<T> GetById<T>(string modelName, string id)
         {
-            var response = await GetAsync($"/Product/{id}");
+            var response = await GetAsync($"/{modelName}/{id}");
             if (response != null && response.IsSuccessStatusCode)
             {
                 var stream = await response.Content.ReadAsStringAsync();
                 if (stream != null)
                 {
-                    var tuple = JsonConvert.DeserializeObject<Product>(stream);
+                    var tuple = JsonConvert.DeserializeObject<T>(stream);
                     return tuple!;
                 }
             }
-            return new Product();
+            return await Task.FromResult(default(T));
         }
 
-        public async Task<string> Create(Product tuple)
+        public async Task<string> Create<T>(T tuple)
         {
-            var content = new StringContent(JObject.FromObject(tuple).ToString(), UnicodeEncoding.UTF8, "application/json");
+            var content = new StringContent(JObject.FromObject(tuple!).ToString(), UnicodeEncoding.UTF8, "application/json");
             var response = await this.PostAsync("/Product/create", content);
             if (response.IsSuccessStatusCode)
             {
@@ -57,16 +61,9 @@ namespace BlazorApp2.API
             return "Error trying to create an item";
         }
 
-        public async Task<string> Update(Product tuple)
+        public async Task<string> Update<T>(T tuple)
         {
-            var data = new Billing.Core.Models.Customer()
-            {
-                Id = tuple.Id,
-                Name = tuple.ProductName,
-                Active = tuple.Active
-            };
-
-            var content = new StringContent(JObject.FromObject(data).ToString(), UnicodeEncoding.UTF8, "application/json");
+            var content = new StringContent(JObject.FromObject(tuple!).ToString(), UnicodeEncoding.UTF8, "application/json");
             var response = await this.PutAsync("/Product/update", content);
 
             if (response.IsSuccessStatusCode)
@@ -76,6 +73,5 @@ namespace BlazorApp2.API
 
             return "Error trying to update an item";
         }
-
     }
 }

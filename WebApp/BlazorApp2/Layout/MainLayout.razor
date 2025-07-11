@@ -1,16 +1,120 @@
 ﻿@inherits LayoutComponentBase
+@inject IConfiguration Configuration
+@inject BlazorApp2.API.ServiceApiClient Client
 <div class="page">
     <div class="sidebar">
         <NavMenu />
     </div>
 
+    <style>
+        .box {
+            display: flex;
+            flex-wrap: wrap;
+            /* background-color: lime; */
+            align-items: center;
+        }
+        .circle-container {
+            position: relative;
+            width: 35px;
+            height: 35px;
+            /* background-color: greenyellow; */
+        }
+
+        .green-circle {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            fill: green
+        }
+
+        .red-circle {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            fill: red
+        }
+    </style>
+
     <main>
-        <div class="top-row px-4">
+        @* <div class="top-row px-4">
             <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
+        </div> *@
+        <div style="margin-left: 35%" >
+            <a>Backend Rest API Url: @Configuration["restApi"]</a>
         </div>
+
+        <div class="box">
+            <div class="circle-container">
+                <svg width="40" height="40">
+                    <circle cx="18" cy="18" r="16" class="@apiClassStyle" />
+                </svg>
+            </div>
+            <div>@apiTextMessage</div>
+        </div>
+        
+        
+        @* <div class="top-row px-4">
+            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
+        </div> *@
 
         <article class="content px-4">
             @Body
         </article>
     </main>
 </div>
+
+
+@code {
+    private int WAIT_TO_CHECK_API_ONLINE = 5;
+    private bool apiServerState { set; get; } = false;
+    private string? apiClassStyle { set; get; }
+    private string? apiTextMessage { set; get; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        CheckApiIsOnline();
+        var cts = new CancellationTokenSource();
+        RT(() => CheckApiIsOnline(), WAIT_TO_CHECK_API_ONLINE, cts.Token);
+    }
+
+    static void RT(Action action, int seconds, CancellationToken token)
+    {
+        if (action == null)
+            return;
+        Task.Run(async () =>
+        {
+            while (!token.IsCancellationRequested)
+            {
+                action();
+                await Task.Delay(TimeSpan.FromSeconds(seconds), token);
+            }
+        }, token);
+    }
+
+    private async void CheckApiIsOnline()
+    {
+        var response = await Client.IsOnline();
+        if (response != null)
+        {
+            Console.WriteLine(response);
+            apiServerState = response.Contains("Pong!");
+            GetApiState();
+            GetOnlineMessage();
+            StateHasChanged();
+        }
+    }
+
+    private void GetApiState()
+    {
+        apiClassStyle = apiServerState ? "green-circle" : "red-circle";
+    }
+
+    private void GetOnlineMessage()
+    {
+        apiTextMessage = apiServerState ? "Server Is Online" : "Server Is Offline";
+    }
+}

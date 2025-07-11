@@ -20,6 +20,7 @@ var restApi = builder.Configuration.GetValue<string>("restApi") ?? throw new Exc
 //var memoryConfig = new MemoryConfigurationSource { InitialData = memData };
 //builder.Configuration.Add(memoryConfig);
 
+builder.Services.AddScoped(client => new ServiceApiClient { BaseAddress = new Uri(restApi!) });
 builder.Services.AddScoped( client => new CustomerApiClient { BaseAddress = new Uri(restApi!) } );
 builder.Services.AddScoped(client => new ProductApiClient { BaseAddress = new Uri(restApi!) } );
 
